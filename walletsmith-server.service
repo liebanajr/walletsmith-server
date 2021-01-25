@@ -1,0 +1,14 @@
+[Unit]
+Description=Walletsmith API Server
+
+[Service]
+PIDFile=/tmp/shots-server.pid
+User=ubuntu
+Group=ubuntu
+Restart=always
+KillSignal=SIGQUIT
+WorkingDirectory=/home/ubuntu/shots-server
+ExecStart=node /home/ubuntu/shots-server/bin/www.js
+
+[Install]
+WantedBy=multi-user.target
