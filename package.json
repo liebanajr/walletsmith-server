@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www.js",
-    "startdev": "nodemon --ignore 'passes/' ./bin/www.js"
+    "startdev": "nodemon --ignore './passes/' --exec node ./bin/www.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.1",

@@ -71,4 +71,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+global.APP_ROOT = path.resolve(__dirname);
+
 module.exports = app;

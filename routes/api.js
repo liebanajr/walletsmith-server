@@ -120,6 +120,7 @@ function compressPass(passFolder) {
 
 router.post('/generatePass', function (req, res, next) {  
   let receivedPass = req.files.pass
+  let passesFolder = path.join(APP_ROOT, "passes")
   let receivedPassDest = path.join(passesFolder, receivedPass.name)
   logger.debug("Saving pass to " + receivedPassDest)
   fs.writeFileSync(receivedPassDest, receivedPass.data)
@@ -135,7 +136,9 @@ router.post('/generatePass', function (req, res, next) {
   .then(compressPass)
   .then(function (passPath) {
     logger.info("Successfully generated " + passPath)
-    res.send("Successfully generated " + passPath)
+    logger.info("Sending...")
+    res.set("Content-Type", "application/vnd.apple.pkpass")
+    res.sendFile(passPath)
   }).catch(function (err) {
     res.send(err)
   })

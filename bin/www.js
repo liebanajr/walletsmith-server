@@ -9,6 +9,9 @@ var http = require('http');
 const fs = require('fs');
 var winston = require('winston');
 var winstonRolling = require('winston-daily-rotate-file');
+const { networkInterfaces } = require('os');
+
+
 
 /**
  * Get port from environment and store in Express.
@@ -114,6 +117,21 @@ httpServer.on('listening', function () {
   debug('Listening on ' + bind);
 });
 
+const nets = networkInterfaces();
+const netsResults = Object.create(null); // Or just '{}', an empty object
+
+for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+        // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+        if (net.family === 'IPv4' && !net.internal) {
+            if (!netsResults[name]) {
+                netsResults[name] = [];
+            }
+            netsResults[name].push(net.address);
+        }
+    }
+}
+logger.debug("IP="+netsResults.en0)
 /**
  * Normalize a port into a number, string, or false.
  */
