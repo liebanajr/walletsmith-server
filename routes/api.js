@@ -72,8 +72,8 @@ function generateSignature(forPass) {
     let signature = path.join(forPass, "signature")
 
     let wwdr = path.join(__dirname, '../certificates/WWDR.pem')
-    let cert = path.join(__dirname, '../certificates/passkitTestCert.pem')
-    let key = path.join(__dirname, '../certificates/passkitTestKey.pem')
+    let cert = path.join(__dirname, '../certificates/walletsmith-test-cert.pem')
+    let key = path.join(__dirname, '../certificates/walletsmith-test-key.pem')
 
     openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -out ' + signature + ' -outform DER -passin pass:12345', function (err, buffer) {
       let errMessage = err.toString()
