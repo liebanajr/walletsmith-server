@@ -31,3 +31,10 @@ passes
 openssl
 logs
 certificates
+
+#Typescript
+bin
+
+#Others
+.env
+ignore
