@@ -10,28 +10,31 @@ var fs = require('fs/promises');
 var AdmZip = require('adm-zip');
 
 //Endpoint
-router.post('/generatePass', async (req, res, next) => {
-  let receivedPass = req.files.pass
-  let passesFolder = path.join(config.passesFolder, "passes")
-  let receivedPassDest = path.join(passesFolder, receivedPass.name)
-  log.debug("Saving pass to " + receivedPassDest)
+router.post('/api/generatePass', async (req, res, next) => {
+  try {
+    let receivedPass = req.files.pass
+    let passesFolder = path.join(config.passesFolder, "passes")
+    let receivedPassDest = path.join(passesFolder, receivedPass.name)
+    log.debug("Saving pass to " + receivedPassDest)
 
-  await fs.writeFile(receivedPassDest, receivedPass.data)
+    await fs.writeFile(receivedPassDest, receivedPass.data)
 
-  var zip = new AdmZip(receivedPassDest);
-  log.debug("Extracting pass contents...")
-  zip.extractAllTo(passesFolder, true)
+    var zip = new AdmZip(receivedPassDest);
+    log.debug("Extracting pass contents...")
+    zip.extractAllTo(passesFolder, true)
 
-  let pass = receivedPassDest.replace('.zip', '.pass')
+    let pass = receivedPassDest.replace('.zip', '.pass')
 
-  await PassManager.generateManifest(pass)
-  PassManager.generateSignature(pass)
-  const compressedPassPath = await PassManager.compressPass(pass)
-  log.info("Successfully generated " + compressedPassPath)
-  log.info("Sending...")
-  res.set("Content-Type", "application/vnd.apple.pkpass")
-  res.sendFile(compressedPassPath)
-
+    await PassManager.generateManifest(pass)
+    await PassManager.generateSignature(pass)
+    const compressedPassPath = await PassManager.compressPass(pass)
+    log.info("Successfully generated " + compressedPassPath)
+    log.info("Sending...")
+    res.set("Content-Type", "application/vnd.apple.pkpass")
+    res.sendFile(compressedPassPath)
+  } catch (err) {
+    next(err)
+  }
 })
 
 module.exports = router
@@ -40,23 +43,25 @@ module.exports = router
 class PassManager {
 
 
-  static SHA1(ofFile): any {
-    var hash = "????"
-    openssl('openssl sha1 -r ' + ofFile, function (err, buffer) {
+  static async SHA1(ofFile): Promise<any> {
+    return new Promise((resolve, reject) => {
+      var hash = "????"
+      openssl('openssl sha1 -r ' + ofFile, async (err, buffer) => {
 
-      if (err) {
-        const msg = "Error in OpenSSL process: " + err.toString()
-        throw new ErrorHandler(500, msg)
-      }
+        if (err.toString()) {
+          const msg = "Error in OpenSSL process: " + err.toString()
+          throw new ErrorHandler(500, msg)
+        }
 
-      hash = buffer.toString().substr(0, 40)
-      let ofFileName = path.basename(ofFile)
-      log.debug(ofFileName + "=" + hash + ";")
+        hash = buffer.toString().substr(0, 40)
+        let ofFileName = path.basename(ofFile)
+        log.silly(ofFileName + "=" + hash + ";")
 
-      return {
-        "hash": hash,
-        "ofFile": ofFile
-      }
+        resolve({
+          "hash": hash,
+          "ofFile": ofFile
+        })
+      })
     })
   }
 
@@ -68,13 +73,12 @@ class PassManager {
 
     const files = await fs.readdir(passFolder)
 
-    files.forEach(function (file) {
+    files.forEach(async (file) => {
       if (ignoreFiles.includes(file)) {
         log.debug("Ignoring " + file)
       } else {
         let filePath = path.join(passFolder, file)
-        const sha = PassManager.SHA1(filePath)
-
+        const sha = await PassManager.SHA1(filePath)
         const fileName = path.basename(sha.ofFile)
         manifest[fileName] = sha.hash
 
@@ -85,33 +89,35 @@ class PassManager {
 
     log.info("Saving manifest: " + manifestPath)
     log.debug(JSON.stringify(manifest))
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest))
+    await fs.writeFile(manifestPath, JSON.stringify(manifest))
 
     return passFolder
 
   }
 
-  static generateSignature(forPass: string): string {
+  static async generateSignature(forPass: string): Promise<string> {
 
-    log.debug("Calculating signature for pass " + forPass)
+    return new Promise((resolve, reject) => {
+      log.debug("Calculating signature for pass " + forPass)
 
-    let manifest = path.join(forPass, "manifest.json")
-    let signature = path.join(forPass, "signature")
+      let manifest = path.join(forPass, "manifest.json")
+      let signature = path.join(forPass, "signature")
 
-    let wwdr = path.join(__dirname, '../certificates/WWDR.pem')
-    let cert = path.join(__dirname, '../certificates/walletsmith-test-cert.pem')
-    let key = path.join(__dirname, '../certificates/walletsmith-test-key.pem')
+      let wwdr = path.join(__dirname, '../../certificates/WWDR.pem')
+      let cert = path.join(__dirname, '../../certificates/walletsmith-test-cert.pem')
+      let key = path.join(__dirname, '../../certificates/walletsmith-test-key.pem')
 
-    openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -out ' + signature + ' -outform DER -passin pass:12345', function (err, buffer) {
-      if (err) {
-        throw err
-      } else {
-        log.debug("Saving signature: " + signature);
-        return forPass
-      }
+      openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -out ' + signature + ' -outform DER -passin pass:12345', function (err, buffer) {
+        if (err.toString()) {
+          throw new ErrorHandler(500, "Error generating signature -> " + err.toString())
+        } else {
+          log.debug("Saving signature: " + signature);
+          resolve(forPass)
+        }
+      })
+
+      reject()
     })
-
-    return null
 
   }
 
