@@ -9,7 +9,7 @@ var cookieParser = require('cookie-parser');
 var compression = require('compression');
 var fileUpload = require('express-fileupload');
 
-var api = require('./api/api-endpoints')
+var passGenerator = require('./api/pass-generator')
 
 var app = express();
 
@@ -35,7 +35,7 @@ app.use(compression())
 app.use(fileUpload())
 
 //API
-app.use('/api', api);
+app.use(passGenerator)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

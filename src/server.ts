@@ -55,7 +55,6 @@ import { log } from './logging'
    });
  
  } catch(err){
-   console.error("Error starting https server: " + err.message);
    log.warn("Error starting https server: " + err.message);
  }
  
@@ -88,7 +87,6 @@ import { log } from './logging'
          }
      }
  }
- log.debug("IP="+netsResults.en0)
  /**
   * Normalize a port into a number, string, or false.
   */
@@ -126,12 +124,10 @@ import { log } from './logging'
    switch (error.code) {
      case 'EACCES':
        log.error(bind + ' requires elevated privileges');
-       console.error(bind + ' requires elevated privileges');
        process.exit(1);
        break;
      case 'EADDRINUSE':
        log.error(bind + ' is already in use');
-       console.error(bind + ' is already in use');
        process.exit(1);
        break;
      default:
