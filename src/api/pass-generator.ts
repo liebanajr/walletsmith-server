@@ -13,7 +13,7 @@ var AdmZip = require('adm-zip');
 router.post('/api/generatePass', async (req, res, next) => {
   try {
     let receivedPass = req.files.pass
-    let passesFolder = path.join(config.passesFolder, "passes")
+    let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
     let receivedPassDest = path.join(passesFolder, receivedPass.name)
     log.debug("Saving pass to " + receivedPassDest)
 
@@ -33,6 +33,7 @@ router.post('/api/generatePass', async (req, res, next) => {
     res.set("Content-Type", "application/vnd.apple.pkpass")
     res.sendFile(compressedPassPath)
   } catch (err) {
+    log.error(err)
     next(err)
   }
 })
@@ -73,7 +74,7 @@ class PassManager {
 
     const files = await fs.readdir(passFolder)
 
-    files.forEach(async (file) => {
+    for(const file of files) {
       if (ignoreFiles.includes(file)) {
         log.debug("Ignoring " + file)
       } else {
@@ -83,7 +84,7 @@ class PassManager {
         manifest[fileName] = sha.hash
 
       }
-    })
+    }
 
     const manifestPath = path.join(passFolder, "manifest.json")
 
@@ -116,7 +117,6 @@ class PassManager {
         }
       })
 
-      reject()
     })
 
   }
