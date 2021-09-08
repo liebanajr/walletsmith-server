@@ -7,6 +7,7 @@ var path = require('path');
 var router = express.Router();
 var openssl = require('openssl-nodejs')
 var fs = require('fs/promises');
+var fsSync = require('fs');
 var AdmZip = require('adm-zip');
 
 //Endpoint
@@ -106,13 +107,13 @@ class PassManager {
 
       let wwdr = path.join(__dirname, '../../certificates/WWDR.pem')
       log.debug(`wwdr path='${wwdr}'`)
-      fs.readFileSync(wwdr)
+      fsSync.readFileSync(wwdr)
       let cert = path.join(__dirname, '../../certificates/walletsmith-test-cert.pem')
       log.debug(`cert path='${cert}'`)
-      fs.readFileSync(cert)
+      fsSync.readFileSync(cert)
       let key = path.join(__dirname, '../../certificates/walletsmith-test-key.pem')
       log.debug(`key path='${key}'`)
-      fs.readFileSync(key)
+      fsSync.readFileSync(key)
 
       openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -out ' + signature + ' -outform DER -passin pass:12345', function (err, buffer) {
         if (err.toString()) {
