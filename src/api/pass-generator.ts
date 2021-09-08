@@ -105,8 +105,11 @@ class PassManager {
       let signature = path.join(forPass, "signature")
 
       let wwdr = path.join(__dirname, '../../certificates/WWDR.pem')
+      log.debug(`wwdr path='${wwdr}'`)
       let cert = path.join(__dirname, '../../certificates/walletsmith-test-cert.pem')
+      log.debug(`cert path='${cert}'`)
       let key = path.join(__dirname, '../../certificates/walletsmith-test-key.pem')
+      log.debug(`key path='${key}'`)
 
       openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -out ' + signature + ' -outform DER -passin pass:12345', function (err, buffer) {
         if (err.toString()) {
