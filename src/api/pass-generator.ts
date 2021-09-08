@@ -106,10 +106,31 @@ class PassManager {
 
       let wwdr = path.join(__dirname, '../../certificates/WWDR.pem')
       log.debug(`wwdr path='${wwdr}'`)
+      fs.readFile(wwdr, function (err, data) {
+        if (err) {
+          log.error(`KO->Can't load ${path}`)
+          throw err; 
+        }
+        log.debug(`OK->Can load ${path}`);
+      });
       let cert = path.join(__dirname, '../../certificates/walletsmith-test-cert.pem')
       log.debug(`cert path='${cert}'`)
+      fs.readFile(cert, function (err, data) {
+        if (err) {
+          log.error(`KO->Can't load ${cert}`)
+          throw err; 
+        }
+        log.debug(`OK->Can load ${cert}`);
+      });
       let key = path.join(__dirname, '../../certificates/walletsmith-test-key.pem')
       log.debug(`key path='${key}'`)
+      fs.readFile(key, function (err, data) {
+        if (err) {
+          log.error(`KO->Can't load ${key}`)
+          throw err; 
+        }
+        log.debug(`OK->Can load ${key}`);
+      });
 
       openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -out ' + signature + ' -outform DER -passin pass:12345', function (err, buffer) {
         if (err.toString()) {

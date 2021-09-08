@@ -8,7 +8,7 @@ Group=pi
 Restart=always
 KillSignal=SIGQUIT
 WorkingDirectory=/home/pi/servers/walletsmith-server
-ExecStart=node /home/pi/servers/walletsmith-server/bin/server.js
+ExecStart=npm start /home/pi/servers/walletsmith-server
 
 [Install]
 WantedBy=multi-user.target
