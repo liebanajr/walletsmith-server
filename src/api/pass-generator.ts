@@ -5,7 +5,7 @@ import { ErrorHandler, handleError as errorHandler } from '../error'
 var express = require('express');
 var path = require('path');
 var router = express.Router();
-var openssl = require('openssl-nodejs')
+var openssl = require('../openssl')
 var fs = require('fs/promises');
 var fsSync = require('fs');
 var AdmZip = require('adm-zip');
