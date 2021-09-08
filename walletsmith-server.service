@@ -2,13 +2,13 @@
 Description=Walletsmith API Server
 
 [Service]
-PIDFile=/tmp/shots-server.pid
-User=ubuntu
-Group=ubuntu
+PIDFile=/tmp/walletsmith-server.pid
+User=pi
+Group=pi
 Restart=always
 KillSignal=SIGQUIT
-WorkingDirectory=/home/ubuntu/shots-server
-ExecStart=node /home/ubuntu/shots-server/bin/www.js
+WorkingDirectory=/home/pi/servers/walletsmith-server
+ExecStart=node /home/pi/servers/walletsmith-server/bin/server.js
 
 [Install]
 WantedBy=multi-user.target
