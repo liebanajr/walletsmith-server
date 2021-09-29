@@ -160,7 +160,7 @@ class PassManager {
       for (const file of files) {
         const filePath = path.join(passesFolder, file);
         log.debug(`Removing existing pass: ${filePath}`)
-        await fs.rm(filePath)
+        await fs.rm(filePath, {force:true,recursive:true})
       }
     } catch (err) {
       log.error(err);
