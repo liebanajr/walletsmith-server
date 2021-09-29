@@ -7,4 +7,4 @@
 #else
 #  echo "no node process with pid "$pid
 #fi
-systemctl stop shots-server
+systemctl stop walletsmith-server

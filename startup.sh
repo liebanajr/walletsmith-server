@@ -1,2 +1,2 @@
 #!/bin/bash
-systemctl start shots-server
+systemctl start walletsmith-server

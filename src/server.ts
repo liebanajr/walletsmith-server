@@ -21,7 +21,6 @@ const { networkInterfaces } = require('os');
 * APP & SERVER SETUP
 */
 var app = require('./app');
-var httpApp = require('./app');
 
 var server;
 var port;
@@ -54,37 +53,23 @@ try {
 
 } catch (err) {
   log.warn("Error starting https server: " + err.message);
+  log.warn("Starting HTTP server instead");
+
+  var httpPort = normalizePort(process.env.HTTP_PORT || config.httpPort);
+  app.set('port', httpPort);
+  var httpServer = http.createServer(app);
+  httpServer.listen(httpPort);
+  log.info("HTTP server listening on port " + httpPort);
+  httpServer.on('error', onError);
+  httpServer.on('listening', function () {
+    var addr = httpServer.address();
+    var bind = typeof addr === 'string'
+      ? 'pipe ' + addr
+      : 'port ' + addr.port;
+    log.debug('Listening on ' + bind);
+  });
 }
 
-var httpPort = normalizePort(process.env.HTTP_PORT || config.httpPort);
-httpApp.set('port', httpPort);
-var httpServer = http.createServer(httpApp);
-
-httpServer.listen(httpPort);
-log.info("HTTP server listening on port " + httpPort);
-httpServer.on('error', onError);
-httpServer.on('listening', function () {
-  var addr = httpServer.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
-});
-
-const nets = networkInterfaces();
-const netsResults = Object.create(null); // Or just '{}', an empty object
-
-for (const name of Object.keys(nets)) {
-  for (const net of nets[name]) {
-    // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
-    if (net.family === 'IPv4' && !net.internal) {
-      if (!netsResults[name]) {
-        netsResults[name] = [];
-      }
-      netsResults[name].push(net.address);
-    }
-  }
-}
 /**
  * Normalize a port into a number, string, or false.
  */

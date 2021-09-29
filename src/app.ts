@@ -1,6 +1,7 @@
 import { config } from './config'
 import { log, requestLogger } from './logging'
 import { ErrorHandler, handleError as errorHandler } from './error'
+import { Logform } from 'winston';
 
 var createError = require('http-errors');
 var express = require('express');
@@ -33,6 +34,11 @@ app.use(compression())
 
 //Enable file upload
 app.use(fileUpload())
+
+//Test ok status
+app.use('/', (req, res, next) => {
+  res.send("App is running")
+})
 
 //API
 app.use(passGenerator)
