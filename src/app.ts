@@ -35,13 +35,13 @@ app.use(compression())
 //Enable file upload
 app.use(fileUpload())
 
+//API
+app.use(passGenerator)
+
 //Test ok status
 app.use('/', (req, res, next) => {
   res.send("App is running")
 })
-
-//API
-app.use(passGenerator)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
