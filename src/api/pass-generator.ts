@@ -13,7 +13,7 @@ var AdmZip = require('adm-zip');
 //Endpoint
 router.post('/api/generatePass', async (req, res, next) => {
   try {
-    PassManager.removeStoredPasses()
+    await PassManager.removeStoredPasses()
     let receivedPass = req.files.pass
     let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
     let receivedPassDest = path.join(passesFolder, receivedPass.name)
