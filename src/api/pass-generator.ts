@@ -13,6 +13,7 @@ var AdmZip = require('adm-zip');
 //Endpoint
 router.post('/api/generatePass', async (req, res, next) => {
   try {
+    PassManager.removeStoredPasses()
     let receivedPass = req.files.pass
     let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
     let receivedPassDest = path.join(passesFolder, receivedPass.name)
@@ -150,6 +151,20 @@ class PassManager {
     zip.writeZip(passPath)
 
     return passPath
+  }
+
+  static async removeStoredPasses() {
+    let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
+    try {
+      const files = await fs.readdir(passesFolder);
+      for (const file of files) {
+        const filePath = path.join(passesFolder, file);
+        log.debug(`Removing existing pass: ${filePath}`)
+        await fs.rm(filePath)
+      }
+    } catch (err) {
+      log.error(err);
+    }
   }
 
 }
