@@ -52,7 +52,7 @@ router.post('/api/signPass', async (req, res, next) => {
     await fs.rm(manifestPath, {force:true,recursive:true})
     log.info("Sending...")
     res.set("Content-Type", "text/plain")
-    res.send(signature)
+    res.send(signature.toString())
   } catch (err) {
     log.error(err)
     next(err)
