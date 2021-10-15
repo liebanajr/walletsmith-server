@@ -46,8 +46,9 @@ router.post('/api/signPass', async (req, res, next) => {
     await PassManager.removeStoredPasses()
     let cert = req.body.cert.passTypeIdentifier
     let manifest = req.body.manifest
-    let manifestPath = path.join(config.passesFolder, uuidv4() + ".json")
-    let signaturePath = path.join(config.passesFolder, uuidv4())
+    let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
+    let manifestPath = path.join(passesFolder, uuidv4() + ".json")
+    let signaturePath = path.join(passesFolder, uuidv4())
     log.debug("Saving manifest:"+manifestPath)
     await fs.writeFile(manifestPath, JSON.stringify(manifest))
     let signature = await PassManager.signPass(cert, "12345", manifestPath)
