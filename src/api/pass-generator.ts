@@ -43,7 +43,7 @@ router.post('/api/generatePass', async (req, res, next) => {
 router.post('/api/signPass', async (req, res, next) => {
   try {
     await PassManager.removeStoredPasses()
-    let cert = JSON.stringify(req.body.cert.passTypeIdentifier)
+    let cert = req.body.cert.passTypeIdentifier
     let manifest = req.body.manifest
 
     let signature = await PassManager.signPass(cert, "12345", manifest)
