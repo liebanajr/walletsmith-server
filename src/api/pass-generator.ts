@@ -175,7 +175,7 @@ class PassManager {
           throw new ErrorHandler(500, "Error generating signature -> " + err.toString())
         } else {
           log.debug("Generated signature: " + buffer);
-          resolve(buffer)
+          resolve(Buffer.from(buffer))
         }
       })
 
