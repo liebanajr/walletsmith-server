@@ -57,7 +57,7 @@ router.post('/api/signPass', async (req, res, next) => {
     await fs.writeFile(signaturePath, signature)
     log.info("Sending...")
     //res.set("Content-Type", "application/vnd.apple.pkpass")
-    res.sendFile(signature)
+    res.sendFile(signaturePath)
     log.debug("Removing signature...")
     await fs.rm(manifestPath, {force:true,recursive:true})
   } catch (err) {
