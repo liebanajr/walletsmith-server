@@ -155,7 +155,7 @@ class PassManager {
 
   }
 
-  static async signPass(withCert: string, certPassword: string, manifest: object): Promise<string> {
+  static async signPass(withCert: string, certPassword: string, manifest: object): Promise<Buffer> {
 
     return new Promise((resolve, reject) => {
       log.debug("Calculating signature for passType " + withCert)
