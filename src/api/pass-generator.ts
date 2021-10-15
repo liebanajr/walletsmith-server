@@ -1,6 +1,7 @@
 import { config } from '../config'
 import { log } from '../logging'
 import { ErrorHandler, handleError as errorHandler } from '../error'
+import { v4 as uuidv4 } from 'uuid';
 
 var express = require('express');
 var path = require('path');
@@ -45,9 +46,10 @@ router.post('/api/signPass', async (req, res, next) => {
     await PassManager.removeStoredPasses()
     let cert = req.body.cert.passTypeIdentifier
     let manifest = req.body.manifest
-
-    let signature = await PassManager.signPass(cert, "12345", manifest)
-
+    let manifestPath = path.join(config.passesFolder, uuidv4() + ".json")
+    await fs.writeFile(manifestPath, JSON.stringify(manifest))
+    let signature = await PassManager.signPass(cert, "12345", manifestPath)
+    await fs.rm(manifestPath, {force:true,recursive:true})
     log.info("Sending...")
     res.set("Content-Type", "text/plain")
     res.send(signature)
