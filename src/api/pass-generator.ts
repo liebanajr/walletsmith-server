@@ -47,12 +47,19 @@ router.post('/api/signPass', async (req, res, next) => {
     let cert = req.body.cert.passTypeIdentifier
     let manifest = req.body.manifest
     let manifestPath = path.join(config.passesFolder, uuidv4() + ".json")
+    let signaturePath = path.join(config.passesFolder, uuidv4())
+    log.debug("Saving manifest...")
     await fs.writeFile(manifestPath, JSON.stringify(manifest))
     let signature = await PassManager.signPass(cert, "12345", manifestPath)
+    log.debug("Removing manifest...")
     await fs.rm(manifestPath, {force:true,recursive:true})
+    log.debug("Saving signature...")
+    await fs.write(signaturePath, signature)
     log.info("Sending...")
-    res.set("Content-Type", "text/plain")
-    res.send(signature.toString())
+    //res.set("Content-Type", "application/vnd.apple.pkpass")
+    res.sendFile(signature)
+    log.debug("Removing signature...")
+    await fs.rm(manifestPath, {force:true,recursive:true})
   } catch (err) {
     log.error(err)
     next(err)
