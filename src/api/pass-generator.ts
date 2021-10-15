@@ -40,6 +40,23 @@ router.post('/api/generatePass', async (req, res, next) => {
   }
 })
 
+router.post('/api/signPass', async (req, res, next) => {
+  try {
+    await PassManager.removeStoredPasses()
+    let cert = req.body.cert
+    let manifest = req.body.manifest
+
+    let signature = await PassManager.signPass(cert, "12345", manifest)
+
+    log.info("Sending...")
+    res.set("Content-Type", "text/plain")
+    res.send(signature)
+  } catch (err) {
+    log.error(err)
+    next(err)
+  }
+})
+
 module.exports = router
 
 //Pass generation
@@ -122,6 +139,34 @@ class PassManager {
         } else {
           log.debug("Saving signature: " + signature);
           resolve(forPass)
+        }
+      })
+
+    })
+
+  }
+
+  static async signPass(withCert: string, certPassword: string, manifest: object): Promise<string> {
+
+    return new Promise((resolve, reject) => {
+      log.debug("Calculating signature for passType " + withCert)
+
+      let wwdr = path.join(__dirname, '../../certificates/WWDR.pem')
+      log.debug(`wwdr path='${wwdr}'`)
+      fsSync.readFileSync(wwdr)
+      let cert = path.join(__dirname, `../../certificates/${withCert}-cert.pem`)
+      log.debug(`cert path='${cert}'`)
+      fsSync.readFileSync(cert)
+      let key = path.join(__dirname, `../../certificates/${withCert}-key.pem`)
+      log.debug(`key path='${key}'`)
+      fsSync.readFileSync(key)
+
+      openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -outform DER -passin pass:' + certPassword, function (err, buffer) {
+        if (err.toString()) {
+          throw new ErrorHandler(500, "Error generating signature -> " + err.toString())
+        } else {
+          log.debug("Generated signature: " + buffer);
+          resolve(buffer)
         }
       })
 
