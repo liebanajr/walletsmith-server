@@ -79,7 +79,9 @@ module.exports = function openssl(params, callback = () => undefined) {
     });
 
     openSSLProcess.on('close', (code) => {
-        console.log(`OpenSSL process ends with code ${code}`)
+        if (code != 0) {
+            console.log(`Something went worng. OpenSSL process ends with code ${code}`)
+        }
         callback.call(null, stderr, stdout);
     });
 

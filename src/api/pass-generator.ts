@@ -44,23 +44,21 @@ router.post('/api/generatePass', async (req, res, next) => {
 router.post('/api/signPass', async (req, res, next) => {
   try {
     await PassManager.removeStoredPasses()
-    let cert = req.body.cert.passTypeIdentifier
-    let manifest = req.body.manifest
+    let cert = req.body.cert
+    var manifest = JSON.parse(req.body.manifest)
+    let fileBaseName = uuidv4()
     let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
-    let manifestPath = path.join(passesFolder, uuidv4() + ".json")
-    let signaturePath = path.join(passesFolder, uuidv4())
+    let dataFolder = path.join(passesFolder, fileBaseName)
+    await fs.mkdir(dataFolder)
+    let manifestPath = path.join(dataFolder, "manifest.json")
+    let signaturePath = path.join(dataFolder, "signature")
     log.debug("Saving manifest:"+manifestPath)
     await fs.writeFile(manifestPath, JSON.stringify(manifest))
-    let signature = await PassManager.signPass(cert, "12345", manifestPath)
-    log.debug("Removing manifest...")
-    await fs.rm(manifestPath, {force:true,recursive:true})
-    log.debug("Saving signature:"+signaturePath)
-    await fs.writeFile(signaturePath, signature)
+    let signature = await PassManager.signPass(cert, "12345", manifestPath, signaturePath)
     log.info("Sending...")
-    //res.set("Content-Type", "application/vnd.apple.pkpass")
     res.sendFile(signaturePath)
-    log.debug("Removing signature...")
-    await fs.rm(manifestPath, {force:true,recursive:true})
+    log.debug("Removing data...")
+    await fs.rm(dataFolder, {force:true,recursive:true})
   } catch (err) {
     log.error(err)
     next(err)
@@ -127,36 +125,11 @@ class PassManager {
 
   static async generateSignature(forPass: string): Promise<string> {
 
-    return new Promise((resolve, reject) => {
-      log.debug("Calculating signature for pass " + forPass)
-
-      let manifest = path.join(forPass, "manifest.json")
-      let signature = path.join(forPass, "signature")
-
-      let wwdr = path.join(__dirname, '../../certificates/WWDR.pem')
-      log.debug(`wwdr path='${wwdr}'`)
-      fsSync.readFileSync(wwdr)
-      let cert = path.join(__dirname, '../../certificates/walletsmith-test-cert.pem')
-      log.debug(`cert path='${cert}'`)
-      fsSync.readFileSync(cert)
-      let key = path.join(__dirname, '../../certificates/walletsmith-test-key.pem')
-      log.debug(`key path='${key}'`)
-      fsSync.readFileSync(key)
-
-      openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -out ' + signature + ' -outform DER -passin pass:12345', function (err, buffer) {
-        if (err.toString()) {
-          throw new ErrorHandler(500, "Error generating signature -> " + err.toString())
-        } else {
-          log.debug("Saving signature: " + signature);
-          resolve(forPass)
-        }
-      })
-
-    })
+    return PassManager.signPass("walletsmith-test", "12345", path.join(forPass, "manifest.json"), path.join(forPass, "signature"))
 
   }
 
-  static async signPass(withCert: string, certPassword: string, manifest: object): Promise<Buffer> {
+  static async signPass(withCert: string, certPassword: string, manifest: string, signaturePath: string): Promise<string> {
 
     return new Promise((resolve, reject) => {
       log.debug("Calculating signature for passType " + withCert)
@@ -171,12 +144,12 @@ class PassManager {
       log.debug(`key path='${key}'`)
       fsSync.readFileSync(key)
 
-      openssl('openssl smime -binary -sign -certfile ' + wwdr + ' -signer ' + cert + ' -inkey ' + key + ' -in ' + manifest + ' -outform DER -passin pass:' + certPassword, function (err, buffer) {
+      openssl(`openssl smime -binary -sign -certfile ${wwdr} -signer ${cert} -inkey ${key} -in ${manifest} -out ${signaturePath} -outform DER -passin pass:${certPassword}`, function (err, buffer) {
         if (err.toString()) {
           throw new ErrorHandler(500, "Error generating signature -> " + err.toString())
         } else {
-          log.debug("Generated signature: " + buffer);
-          resolve(Buffer.from(buffer))
+          log.debug("Generated signature.")
+          resolve(buffer)
         }
       })
 
