@@ -54,8 +54,9 @@ try {
 } catch (err) {
   log.warn("Error starting https server: " + err.message);
   log.warn("Starting HTTP server instead");
+}
 
-  var httpPort = normalizePort(process.env.HTTP_PORT || config.httpPort);
+var httpPort = normalizePort(process.env.HTTP_PORT || config.httpPort);
   app.set('port', httpPort);
   var httpServer = http.createServer(app);
   httpServer.listen(httpPort);
@@ -68,7 +69,6 @@ try {
       : 'port ' + addr.port;
     log.debug('Listening on ' + bind);
   });
-}
 
 /**
  * Normalize a port into a number, string, or false.
