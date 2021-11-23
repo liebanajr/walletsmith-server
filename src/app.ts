@@ -2,6 +2,8 @@ import { config } from './config'
 import { log, requestLogger } from './logging'
 import { ErrorHandler, handleError as errorHandler } from './error'
 import { Logform } from 'winston';
+const promBundle = require("express-prom-bundle");
+const metricsMiddleware = promBundle({includeMethod: true, includePath: true})
 
 var createError = require('http-errors');
 var express = require('express');
@@ -17,6 +19,9 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+//Request metrics
+app.use(metricsMiddleware);
 
 //Log request data
 app.use(requestLogger)
