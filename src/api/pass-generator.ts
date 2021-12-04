@@ -16,7 +16,7 @@ router.post('/api/generatePass', async (req, res, next) => {
   try {
     await PassManager.removeStoredPasses()
     let receivedPass = req.files.pass
-    let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
+    let passesFolder = path.join(__dirname,"../..","./tmp", "passes")
     let receivedPassDest = path.join(passesFolder, receivedPass.name)
     log.debug("Saving pass to " + receivedPassDest)
 
@@ -47,7 +47,7 @@ router.post('/api/signPass', async (req, res, next) => {
     let cert = req.body.cert
     var manifest = JSON.parse(req.body.manifest)
     let fileBaseName = uuidv4()
-    let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
+    let passesFolder = path.join(__dirname,"../..","./tmp", "passes")
     let dataFolder = path.join(passesFolder, fileBaseName)
     await fs.mkdir(dataFolder)
     let manifestPath = path.join(dataFolder, "manifest.json")
@@ -182,7 +182,7 @@ class PassManager {
   }
 
   static async removeStoredPasses() {
-    let passesFolder = path.join(__dirname,"../..",config.passesFolder, "passes")
+    let passesFolder = path.join(__dirname,"../..","./tmp", "passes")
     try {
       const files = await fs.readdir(passesFolder);
       for (const file of files) {
