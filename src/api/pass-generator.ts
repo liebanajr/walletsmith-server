@@ -49,7 +49,7 @@ router.post('/api/signPass', async (req, res, next) => {
     let fileBaseName = uuidv4()
     let passesFolder = path.join(__dirname,"../..","./tmp", "passes")
     let dataFolder = path.join(passesFolder, fileBaseName)
-    await fs.mkdir(dataFolder)
+    await fs.mkdir(dataFolder, { recursive: true })
     let manifestPath = path.join(dataFolder, "manifest.json")
     let signaturePath = path.join(dataFolder, "signature")
     log.debug("Saving manifest:"+manifestPath)
