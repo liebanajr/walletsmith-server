@@ -44,8 +44,8 @@ app.use(fileUpload())
 app.use(passGenerator)
 
 //Test ok status
-app.use('/', (req, res, next) => {
-  res.send("App is running")
+app.use('/api/health', (req, res, next) => {
+  res.send("OK")
 })
 
 // catch 404 and forward to error handler
