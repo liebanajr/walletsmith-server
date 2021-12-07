@@ -54,7 +54,9 @@ router.post('/api/signPass', async (req, res, next) => {
     let signaturePath = path.join(dataFolder, "signature")
     log.debug("Saving manifest:"+manifestPath)
     await fs.writeFile(manifestPath, JSON.stringify(manifest))
-    let signature = await PassManager.signPass(cert, "12345", manifestPath, signaturePath)
+    let pwd = config.passSignPwd
+    if(!pwd) throw new Error("No pass signing password defined")
+    let signature = await PassManager.signPass(cert, pwd, manifestPath, signaturePath)
     log.info("Sending...")
     res.sendFile(signaturePath)
     log.debug("Removing data...")
@@ -125,7 +127,7 @@ class PassManager {
 
   static async generateSignature(forPass: string): Promise<string> {
 
-    return PassManager.signPass("walletsmith-test", "12345", path.join(forPass, "manifest.json"), path.join(forPass, "signature"))
+    return PassManager.signPass("walletsmith-test", config.passSignPwd, path.join(forPass, "manifest.json"), path.join(forPass, "signature"))
 
   }
 
