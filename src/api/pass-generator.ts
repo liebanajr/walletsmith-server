@@ -57,13 +57,18 @@ router.post('/api/signPass', async (req, res, next) => {
     let pwd = config.passSignPwd
     if(!pwd) throw new Error("No pass signing password defined")
     let signature = await PassManager.signPass(cert, pwd, manifestPath, signaturePath)
-    log.info("Sending...")
-    res.sendFile(signaturePath)
+    if(!signature) {
+      res.status(500).send("Error signing pass")
+    } else {
+      log.info("Sending...")
+      res.sendFile(signaturePath)
+    }
     log.debug("Removing data...")
     await fs.rm(dataFolder, {force:true,recursive:true})
   } catch (err) {
+    log.error("ERRRRRRRROR")
     log.error(err)
-    next(err)
+    res.status(500).send("Error signing pass: " + err)
   }
 })
 
@@ -127,11 +132,11 @@ class PassManager {
 
   static async generateSignature(forPass: string): Promise<string> {
 
-    return PassManager.signPass("walletsmith-test", config.passSignPwd, path.join(forPass, "manifest.json"), path.join(forPass, "signature"))
+    return await PassManager.signPass("walletsmith-test", config.passSignPwd, path.join(forPass, "manifest.json"), path.join(forPass, "signature"))
 
   }
 
-  static async signPass(withCert: string, certPassword: string, manifest: string, signaturePath: string): Promise<string> {
+  static async signPass(withCert: string, certPassword: string, manifest: string, signaturePath: string): Promise<string | undefined> {
 
     return new Promise((resolve, reject) => {
       log.debug("Calculating signature for passType " + withCert)
@@ -146,9 +151,10 @@ class PassManager {
       log.debug(`key path='${key}'`)
       fsSync.readFileSync(key)
 
-      openssl(`openssl smime -binary -sign -certfile ${wwdr} -signer ${cert} -inkey ${key} -in ${manifest} -out ${signaturePath} -outform DER -passin pass:${certPassword}`, function (err, buffer) {
+      openssl(`openssl smime -md md5 -binary -sign -certfile ${wwdr} -signer ${cert} -inkey ${key} -in ${manifest} -out ${signaturePath} -outform DER -passin pass:${certPassword}`, function (err, buffer) {
         if (err.toString()) {
-          throw new ErrorHandler(500, "Error generating signature -> " + err.toString())
+          log.error("Error generating signature -> " + err.toString())
+          resolve(undefined)
         } else {
           log.debug("Generated signature.")
           resolve(buffer)
