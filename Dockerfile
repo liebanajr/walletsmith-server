@@ -2,6 +2,7 @@ FROM node:16
 WORKDIR /app
 COPY package*.json ./
 COPY ./certificates ./certificates
+COPY ./assets ./assets
 COPY ./src ./src
 COPY ./tsconfig.json ./
 RUN ls
