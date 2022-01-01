@@ -52,7 +52,7 @@ router.post('/web/:lang?/support/send-email', async (req, res, next) => {
   
     transporter.sendMail(mailOptions, function(error, info){
       if (error) {
-        log.error(error);
+        log.error(`Error sending mail: ${error}`);
       } else {
         log.info('Email sent:' + info.response);
       }
