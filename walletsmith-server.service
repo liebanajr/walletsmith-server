@@ -3,8 +3,8 @@ Description=Walletsmith API Server
 
 [Service]
 PIDFile=/tmp/walletsmith-server.pid
-User=pi
-Group=pi
+User=root
+Group=root
 Restart=always
 KillSignal=SIGQUIT
 WorkingDirectory=/home/pi/servers/walletsmith-server
