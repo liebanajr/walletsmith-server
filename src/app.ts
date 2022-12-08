@@ -33,7 +33,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 
 //Serve file statically
-app.use(express.static(path.join(__dirname, 'public'),{dotfiles:'allow'}))
+app.use(express.static(path.join(__dirname, '../public'),{dotfiles:'allow'}))
 
 // compress all responses
 app.use(compression())
