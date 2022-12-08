@@ -11,36 +11,7 @@ var fs = require('fs/promises');
 var fsSync = require('fs');
 var AdmZip = require('adm-zip');
 
-//Endpoint
-router.post('/api/generatePass', async (req, res, next) => {
-  try {
-    await PassManager.removeStoredPasses()
-    let receivedPass = req.files.pass
-    let passesFolder = path.join(__dirname,"../..","./tmp", "passes")
-    let receivedPassDest = path.join(passesFolder, receivedPass.name)
-    log.debug("Saving pass to " + receivedPassDest)
-
-    await fs.writeFile(receivedPassDest, receivedPass.data)
-
-    var zip = new AdmZip(receivedPassDest);
-    log.debug("Extracting pass contents...")
-    zip.extractAllTo(passesFolder, true)
-
-    let pass = receivedPassDest.replace('.zip', '.pass')
-
-    await PassManager.generateManifest(pass)
-    await PassManager.generateSignature(pass)
-    const compressedPassPath = await PassManager.compressPass(pass)
-    log.info("Successfully generated " + compressedPassPath)
-    log.info("Sending...")
-    res.set("Content-Type", "application/vnd.apple.pkpass")
-    res.sendFile(compressedPassPath)
-  } catch (err) {
-    log.error(err)
-    next(err)
-  }
-})
-
+//Endpoints
 router.post('/api/signPass', async (req, res, next) => {
   try {
     await PassManager.removeStoredPasses()
@@ -66,7 +37,7 @@ router.post('/api/signPass', async (req, res, next) => {
     log.debug("Removing data...")
     await fs.rm(dataFolder, {force:true,recursive:true})
   } catch (err) {
-    log.error("ERRRRRRRROR")
+    log.error("ERROR")
     log.error(err)
     res.status(500).send("Error signing pass: " + err)
   }
@@ -98,36 +69,6 @@ class PassManager {
         })
       })
     })
-  }
-
-  static async generateManifest(passFolder: string): Promise<String> {
-
-    const ignoreFiles = [".DS_Store", "manifest.json", "signature"]
-
-    var manifest = {}
-
-    const files = await fs.readdir(passFolder)
-
-    for(const file of files) {
-      if (ignoreFiles.includes(file)) {
-        log.debug("Ignoring " + file)
-      } else {
-        let filePath = path.join(passFolder, file)
-        const sha = await PassManager.SHA1(filePath)
-        const fileName = path.basename(sha.ofFile)
-        manifest[fileName] = sha.hash
-
-      }
-    }
-
-    const manifestPath = path.join(passFolder, "manifest.json")
-
-    log.info("Saving manifest: " + manifestPath)
-    log.debug(JSON.stringify(manifest))
-    await fs.writeFile(manifestPath, JSON.stringify(manifest))
-
-    return passFolder
-
   }
 
   static async generateSignature(forPass: string): Promise<string> {
@@ -163,30 +104,6 @@ class PassManager {
 
     })
 
-  }
-
-  static async compressPass(passFolder: string) {
-
-    const ignoreFiles = [".DS_Store"]
-
-    const files = await fs.readdir(passFolder)
-
-    var zip = new AdmZip()
-    files.forEach(function (file) {
-      if (ignoreFiles.includes(file)) {
-        log.debug("Ignoring " + file)
-      } else {
-        let filePath = path.join(passFolder, file)
-        log.debug("Adding to zip: " + file)
-        zip.addLocalFile(filePath)
-      }
-    });
-    let passName = path.basename(passFolder).replace('.pass', '.pkpass')
-    let passPath = path.join(passFolder, '..', passName)
-    log.info("Creating pass " + passPath)
-    zip.writeZip(passPath)
-
-    return passPath
   }
 
   static async removeStoredPasses() {

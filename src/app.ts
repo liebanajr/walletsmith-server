@@ -13,7 +13,6 @@ var compression = require('compression');
 var fileUpload = require('express-fileupload');
 
 var passGenerator = require('./api/pass-generator')
-var offerCodes = require('./api/offer-codes')
 var web = require('./web/web')
 
 var app = express();
@@ -44,7 +43,6 @@ app.use(fileUpload())
 
 //API
 app.use(passGenerator)
-app.use(offerCodes)
 
 //WEB
 app.use(web)
