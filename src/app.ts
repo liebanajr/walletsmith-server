@@ -1,7 +1,5 @@
-import { config } from './config'
 import { log, requestLogger } from './logging'
-import { ErrorHandler, handleError as errorHandler } from './error'
-import { Logform } from 'winston';
+import { handleError as errorHandler } from './error'
 const promBundle = require("express-prom-bundle");
 const metricsMiddleware = promBundle({includeMethod: true, includePath: true})
 

@@ -5,13 +5,7 @@ import { log } from './logging'
 /**
  * Module dependencies.
  */
-var debug = require('debug')('app:server');
-var https = require('https');
 var http = require('http');
-const fs = require('fs');
-var winston = require('winston');
-var winstonRolling = require('winston-daily-rotate-file');
-const { networkInterfaces } = require('os');
 
 /**
  * Get port from environment and store in Express.
@@ -31,29 +25,6 @@ try {
   /**
    * Create HTTPS server.
    */
-  const privateKey = fs.readFileSync(config.httpsKeyPath, 'utf8');
-  const certificate = fs.readFileSync(config.httpsCertPath, 'utf8');
-  const options = {
-    key: privateKey,
-    cert: certificate
-  };
-
-  server = https.createServer(options, app);
-
-  server.listen(port);
-  log.info("HTTPS server listening on port " + port);
-  server.on('error', onError);
-  server.on('listening', function () {
-    var addr = server.address();
-    var bind = typeof addr === 'string'
-      ? 'pipe ' + addr
-      : 'port ' + addr.port;
-    debug('Listening on ' + bind);
-  });
-
-} catch (err) {
-  log.warn("Error starting https server: " + err.message);
-  log.warn("Starting HTTP server instead");
   app.set('port', port);
   var httpServer = http.createServer(app);
   httpServer.listen(port);
@@ -66,6 +37,10 @@ try {
       : 'port ' + addr.port;
     log.debug('Listening on ' + bind);
   });
+
+} catch (err) {
+  log.warn("Error starting HTTP server: " + err.message);
+  throw err
 }
 
 /**
