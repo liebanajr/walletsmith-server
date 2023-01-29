@@ -11,6 +11,7 @@ var compression = require('compression');
 var fileUpload = require('express-fileupload');
 
 var passGenerator = require('./api/pass-generator')
+var barcodeGenerator = require('./api/barcode-generator')
 var web = require('./web/web')
 
 var app = express();
@@ -43,6 +44,7 @@ app.use(fileUpload())
 
 //API
 app.use(passGenerator)
+app.use(barcodeGenerator)
 
 //WEB
 app.use(web)
