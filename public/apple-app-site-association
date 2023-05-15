@@ -11,8 +11,12 @@
                },
                {
                   "/": "/event/*",
-                  "comment": "Matches any URL with a path that starts with /buy/."
-               }
+                  "comment": "Matches any URL with a path that starts with /event/."
+               },
+               {
+                "/": "/pass/*",
+                "comment": "Matches any URL with a path that starts with /pass/."
+             }
              ]
            }
        ]
