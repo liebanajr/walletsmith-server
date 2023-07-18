@@ -38,3 +38,5 @@ bin
 #Others
 .env
 ignore
+tmp/passes/*
+template_passes
