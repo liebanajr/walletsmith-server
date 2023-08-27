@@ -40,3 +40,4 @@ bin
 ignore
 tmp/passes/*
 template_passes
+docker-compose.yml
