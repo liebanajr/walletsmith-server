@@ -16,7 +16,7 @@
                {
                 "/": "/pass/*",
                 "comment": "Matches any URL with a path that starts with /pass/."
-             }
+               }
              ]
            }
        ]
